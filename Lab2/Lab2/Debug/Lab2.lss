@@ -138,6 +138,7 @@ int main(void)
   ce:	97 e0       	ldi	r25, 0x07	; 7
   d0:	90 93 89 00 	sts	0x0089, r25	; 0x800089 <__DATA_REGION_ORIGIN__+0x29>
   d4:	80 93 88 00 	sts	0x0088, r24	; 0x800088 <__DATA_REGION_ORIGIN__+0x28>
+	//OCR1A = 625; //10 ms
 	sei(); //Enable global interrupt
   d8:	78 94       	sei
   da:	ff cf       	rjmp	.-2      	; 0xda <main+0x2a>
