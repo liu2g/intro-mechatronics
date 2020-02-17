@@ -1,7 +1,7 @@
 /*
- * Lab2.c
+ * Lab3_0.c
  *
- * Created: 1/28/2020 15:37:17
+ * Created: 2/12/2020 16:41:13
  * Author : leo85
  */ 
 
@@ -9,14 +9,16 @@
 #include <avr/interrupt.h>
 
 /* Pin config
-PD0-7 : Flip switches
+PD0   : Spinner switch
 PB0-1 : Digit0-1 select
 PB2   : Segment A
 PC5-0 : Segment B-G
 */
 
+volatile int last_pin; //Store the pin value from last iteration
+volatile int edge_count; //Store the number of falling edges on the switch
 volatile int seg_sel; //Flag to select two 7 segs
-volatile int seg_bin; //7 bit var to store 7 seg on/off values
+volatile int seg_bin = 0; //7 bit var to store 7 seg on/off values
 int bin_to_segs (int);
 
 //Interrupt to toggle two 7 seg selects b/w 01 and 10
@@ -25,13 +27,13 @@ ISR(TIMER1_COMPA_vect)
 	if (seg_sel) {
 		PORTB |= (1 << PORTB0); //Deselect first 7 seg
 		PORTB &= ~(1 << PORTB1); //Select second 7 seg
-		seg_bin = bin_to_segs( (~PIND) & 0b1111 );
+		seg_bin = bin_to_segs( edge_count & 0b1111 );
 		//PORTC = (~PIND) & 0b111111;
 	}
 	else {
 		PORTB &= ~(1 << PORTB0); //Select first 7 seg
 		PORTB |= (1 << PORTB1); //Deselect second 7 seg
-		seg_bin = bin_to_segs( (~PIND >> 4) & 0b1111 );
+		seg_bin = bin_to_segs( (edge_count >> 4) & 0b1111 );
 		//PORTC = (~PIND) & 0b111111;
 	}
 	
@@ -49,7 +51,7 @@ ISR(TIMER1_COMPA_vect)
 int main(void)
 {
 	//Pin config
-	DDRD = 0;
+	DDRD = 0b11111110;
 	DDRB = 0b00000111;
 	DDRC = 0b00111111;
 	
@@ -63,13 +65,16 @@ int main(void)
 	//OCR1A = 15625; //250 ms
 	//OCR1A = 6250;  //100 ms
 	//OCR1A = 1875; //30 ms
-	OCR1A = 625; //10 ms
+	OCR1A = 62; //1 ms
 	sei(); //Enable global interrupt
 	
 	
     while (1) 
     {
-		
+		if ((last_pin == 1) && (PIND == 0)) edge_count += 1;
+		last_pin = PIND;
+		//while (PIND) {}
+		//edge_count += 1;
     }
 }
 
@@ -130,3 +135,4 @@ int bin_to_segs (int bin_value) //Converts 4 bit value from switches to 7 bit A-
 				
 	}
 }
+
