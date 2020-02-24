@@ -3,31 +3,31 @@ Lab3_1.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  000002e4  2**0
+  0 .data         00000000  00800100  00800100  000002f0  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         00000270  00000000  00000000  00000074  2**1
+  1 .text         0000027c  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000006  00800100  00800100  000002e4  2**0
+  2 .bss          00000006  00800100  00800100  000002f0  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  000002e4  2**0
+  3 .comment      00000030  00000000  00000000  000002f0  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000314  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000320  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000030  00000000  00000000  00000354  2**0
+  5 .debug_aranges 00000030  00000000  00000000  00000360  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00000746  00000000  00000000  00000384  2**0
+  6 .debug_info   00000746  00000000  00000000  00000390  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00000660  00000000  00000000  00000aca  2**0
+  7 .debug_abbrev 00000660  00000000  00000000  00000ad6  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   0000032d  00000000  00000000  0000112a  2**0
+  8 .debug_line   00000339  00000000  00000000  00001136  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  0000008c  00000000  00000000  00001458  2**2
+  9 .debug_frame  0000008c  00000000  00000000  00001470  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000387  00000000  00000000  000014e4  2**0
+ 10 .debug_str    00000387  00000000  00000000  000014fc  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    000002d1  00000000  00000000  0000186b  2**0
+ 11 .debug_loc    000002d1  00000000  00000000  00001883  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000020  00000000  00000000  00001b3c  2**0
+ 12 .debug_ranges 00000020  00000000  00000000  00001b54  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -98,7 +98,7 @@ Disassembly of section .text:
   a0:	b2 07       	cpc	r27, r18
   a2:	e1 f7       	brne	.-8      	; 0x9c <.do_clear_bss_loop>
   a4:	0e 94 58 00 	call	0xb0	; 0xb0 <main>
-  a8:	0c 94 36 01 	jmp	0x26c	; 0x26c <_exit>
+  a8:	0c 94 3c 01 	jmp	0x278	; 0x278 <_exit>
 
 000000ac <__bad_interrupt>:
   ac:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -136,7 +136,6 @@ int main(void)
   d0:	90 e0       	ldi	r25, 0x00	; 0
   d2:	90 93 89 00 	sts	0x0089, r25	; 0x800089 <__DATA_REGION_ORIGIN__+0x29>
   d6:	80 93 88 00 	sts	0x0088, r24	; 0x800088 <__DATA_REGION_ORIGIN__+0x28>
-	//OCR1A = 47; //3 ms / 16
 	sei(); //Enable global interrupt
   da:	78 94       	sei
 		switch (onoff)
@@ -199,7 +198,7 @@ int bin_to_segs (int bin_value) //Converts 4 bit value from switches to 7 bit A-
  124:	fc 01       	movw	r30, r24
  126:	ec 5c       	subi	r30, 0xCC	; 204
  128:	ff 4f       	sbci	r31, 0xFF	; 255
- 12a:	0c 94 30 01 	jmp	0x260	; 0x260 <__tablejump2__>
+ 12a:	0c 94 36 01 	jmp	0x26c	; 0x26c <__tablejump2__>
 	{
 		case 0x0:
 			return 0b1111110;
@@ -355,10 +354,10 @@ ISR(TIMER1_COMPA_vect)
  1d8:	81 60       	ori	r24, 0x01	; 1
  1da:	90 93 02 01 	sts	0x0102, r25	; 0x800102 <shift+0x1>
  1de:	80 93 01 01 	sts	0x0101, r24	; 0x800101 <shift>
-	if (seg_sel) {
+	if (seg_sel<50) {
  1e2:	80 91 04 01 	lds	r24, 0x0104	; 0x800104 <seg_sel>
- 1e6:	88 23       	and	r24, r24
- 1e8:	59 f0       	breq	.+22     	; 0x200 <__vector_11+0x6c>
+ 1e6:	82 33       	cpi	r24, 0x32	; 50
+ 1e8:	58 f4       	brcc	.+22     	; 0x200 <__vector_11+0x6c>
 		PORTB |= (1 << PORTB0); //Deselect first 7 seg
  1ea:	28 9a       	sbi	0x05, 0	; 5
 		PORTB &= ~(1 << PORTB1); //Select second 7 seg
@@ -369,78 +368,85 @@ ISR(TIMER1_COMPA_vect)
  1f4:	90 e0       	ldi	r25, 0x00	; 0
  1f6:	0e 94 8f 00 	call	0x11e	; 0x11e <bin_to_segs>
  1fa:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <_edata>
- 1fe:	0b c0       	rjmp	.+22     	; 0x216 <__vector_11+0x82>
+ 1fe:	12 c0       	rjmp	.+36     	; 0x224 <__vector_11+0x90>
+		//PORTC = (~PIND) & 0b111111;
+	}
+	else if (seg_sel<100) {
+ 200:	80 91 04 01 	lds	r24, 0x0104	; 0x800104 <seg_sel>
+ 204:	84 36       	cpi	r24, 0x64	; 100
+ 206:	60 f4       	brcc	.+24     	; 0x220 <__vector_11+0x8c>
+		PORTB &= ~(1 << PORTB0); //Select first 7 seg
+ 208:	28 98       	cbi	0x05, 0	; 5
+		PORTB |= (1 << PORTB1); //Deselect second 7 seg
+ 20a:	29 9a       	sbi	0x05, 1	; 5
+		seg_bin = bin_to_segs( (edge_count >> 4) & 0b1111 );
+ 20c:	80 91 03 01 	lds	r24, 0x0103	; 0x800103 <edge_count>
+ 210:	82 95       	swap	r24
+ 212:	8f 70       	andi	r24, 0x0F	; 15
+ 214:	90 e0       	ldi	r25, 0x00	; 0
+ 216:	0e 94 8f 00 	call	0x11e	; 0x11e <bin_to_segs>
+ 21a:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <_edata>
+ 21e:	02 c0       	rjmp	.+4      	; 0x224 <__vector_11+0x90>
 		//PORTC = (~PIND) & 0b111111;
 	}
 	else {
-		PORTB &= ~(1 << PORTB0); //Select first 7 seg
- 200:	28 98       	cbi	0x05, 0	; 5
-		PORTB |= (1 << PORTB1); //Deselect second 7 seg
- 202:	29 9a       	sbi	0x05, 1	; 5
-		seg_bin = bin_to_segs( (edge_count >> 4) & 0b1111 );
- 204:	80 91 03 01 	lds	r24, 0x0103	; 0x800103 <edge_count>
- 208:	82 95       	swap	r24
- 20a:	8f 70       	andi	r24, 0x0F	; 15
- 20c:	90 e0       	ldi	r25, 0x00	; 0
- 20e:	0e 94 8f 00 	call	0x11e	; 0x11e <bin_to_segs>
- 212:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <_edata>
-		//PORTC = (~PIND) & 0b111111;
+		seg_sel=0;
+ 220:	10 92 04 01 	sts	0x0104, r1	; 0x800104 <seg_sel>
 	}
 	
 	//Turn on/off seg A
 	if (seg_bin >> 6) PORTB |= (1 << PORTB2);
- 216:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <_edata>
- 21a:	82 95       	swap	r24
- 21c:	86 95       	lsr	r24
- 21e:	86 95       	lsr	r24
- 220:	83 70       	andi	r24, 0x03	; 3
- 222:	11 f0       	breq	.+4      	; 0x228 <__vector_11+0x94>
- 224:	2a 9a       	sbi	0x05, 2	; 5
- 226:	01 c0       	rjmp	.+2      	; 0x22a <__vector_11+0x96>
+ 224:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <_edata>
+ 228:	82 95       	swap	r24
+ 22a:	86 95       	lsr	r24
+ 22c:	86 95       	lsr	r24
+ 22e:	83 70       	andi	r24, 0x03	; 3
+ 230:	11 f0       	breq	.+4      	; 0x236 <__vector_11+0xa2>
+ 232:	2a 9a       	sbi	0x05, 2	; 5
+ 234:	01 c0       	rjmp	.+2      	; 0x238 <__vector_11+0xa4>
 	else PORTB &= ~(1 << PORTB2);
- 228:	2a 98       	cbi	0x05, 2	; 5
+ 236:	2a 98       	cbi	0x05, 2	; 5
 	
 	//Turn on/off seg B-G
 	PORTC = seg_bin & 0b111111;
- 22a:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <_edata>
- 22e:	8f 73       	andi	r24, 0x3F	; 63
- 230:	88 b9       	out	0x08, r24	; 8
+ 238:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <_edata>
+ 23c:	8f 73       	andi	r24, 0x3F	; 63
+ 23e:	88 b9       	out	0x08, r24	; 8
 	
 	//Toggle flag
-	seg_sel ^= 1;
- 232:	90 91 04 01 	lds	r25, 0x0104	; 0x800104 <seg_sel>
- 236:	81 e0       	ldi	r24, 0x01	; 1
- 238:	89 27       	eor	r24, r25
- 23a:	80 93 04 01 	sts	0x0104, r24	; 0x800104 <seg_sel>
+	seg_sel += 1;
+ 240:	80 91 04 01 	lds	r24, 0x0104	; 0x800104 <seg_sel>
+ 244:	8f 5f       	subi	r24, 0xFF	; 255
+ 246:	80 93 04 01 	sts	0x0104, r24	; 0x800104 <seg_sel>
 }
- 23e:	ff 91       	pop	r31
- 240:	ef 91       	pop	r30
- 242:	bf 91       	pop	r27
- 244:	af 91       	pop	r26
- 246:	9f 91       	pop	r25
- 248:	8f 91       	pop	r24
- 24a:	7f 91       	pop	r23
- 24c:	6f 91       	pop	r22
- 24e:	5f 91       	pop	r21
- 250:	4f 91       	pop	r20
- 252:	3f 91       	pop	r19
- 254:	2f 91       	pop	r18
- 256:	0f 90       	pop	r0
- 258:	0f be       	out	0x3f, r0	; 63
- 25a:	0f 90       	pop	r0
- 25c:	1f 90       	pop	r1
- 25e:	18 95       	reti
+ 24a:	ff 91       	pop	r31
+ 24c:	ef 91       	pop	r30
+ 24e:	bf 91       	pop	r27
+ 250:	af 91       	pop	r26
+ 252:	9f 91       	pop	r25
+ 254:	8f 91       	pop	r24
+ 256:	7f 91       	pop	r23
+ 258:	6f 91       	pop	r22
+ 25a:	5f 91       	pop	r21
+ 25c:	4f 91       	pop	r20
+ 25e:	3f 91       	pop	r19
+ 260:	2f 91       	pop	r18
+ 262:	0f 90       	pop	r0
+ 264:	0f be       	out	0x3f, r0	; 63
+ 266:	0f 90       	pop	r0
+ 268:	1f 90       	pop	r1
+ 26a:	18 95       	reti
 
-00000260 <__tablejump2__>:
- 260:	ee 0f       	add	r30, r30
- 262:	ff 1f       	adc	r31, r31
- 264:	05 90       	lpm	r0, Z+
- 266:	f4 91       	lpm	r31, Z
- 268:	e0 2d       	mov	r30, r0
- 26a:	09 94       	ijmp
+0000026c <__tablejump2__>:
+ 26c:	ee 0f       	add	r30, r30
+ 26e:	ff 1f       	adc	r31, r31
+ 270:	05 90       	lpm	r0, Z+
+ 272:	f4 91       	lpm	r31, Z
+ 274:	e0 2d       	mov	r30, r0
+ 276:	09 94       	ijmp
 
-0000026c <_exit>:
- 26c:	f8 94       	cli
+00000278 <_exit>:
+ 278:	f8 94       	cli
 
-0000026e <__stop_program>:
- 26e:	ff cf       	rjmp	.-2      	; 0x26e <__stop_program>
+0000027a <__stop_program>:
+ 27a:	ff cf       	rjmp	.-2      	; 0x27a <__stop_program>

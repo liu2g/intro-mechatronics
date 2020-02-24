@@ -27,17 +27,20 @@ ISR(TIMER1_COMPA_vect)
 {
 	shift = shift << 1;
 	if (PIND == 0) shift |= 1; //if pin is LOW, shift a 1; otherwise shift a 0
-	if (seg_sel) {
+	if (seg_sel<50) {
 		PORTB |= (1 << PORTB0); //Deselect first 7 seg
 		PORTB &= ~(1 << PORTB1); //Select second 7 seg
 		seg_bin = bin_to_segs( edge_count & 0b1111 );
 		//PORTC = (~PIND) & 0b111111;
 	}
-	else {
+	else if (seg_sel<100) {
 		PORTB &= ~(1 << PORTB0); //Select first 7 seg
 		PORTB |= (1 << PORTB1); //Deselect second 7 seg
 		seg_bin = bin_to_segs( (edge_count >> 4) & 0b1111 );
 		//PORTC = (~PIND) & 0b111111;
+	}
+	else {
+		seg_sel=0;
 	}
 	
 	//Turn on/off seg A
@@ -48,7 +51,7 @@ ISR(TIMER1_COMPA_vect)
 	PORTC = seg_bin & 0b111111;
 	
 	//Toggle flag
-	seg_sel ^= 1;
+	seg_sel += 1;
 }
 
 int main(void)
