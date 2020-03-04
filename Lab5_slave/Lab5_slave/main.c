@@ -46,36 +46,30 @@ int main(void)
 }
 
 ISR(USART_RX_vect){
-	if (RXB80) {
-		if (UDR0 == 0x10){
+	if (RXB80 && UDR0 == 0x10) {  //1st packet uses multiprocessor and 9th bit
 			UCSR0A &= ~(1<<MPCM0);
-			packcount ++;
-		}
-		else {
-			UCSR0A |= (1<<MPCM0);
-			packcount = 0;
-		}
+			packcount ++;		
 	}
-	else {
+	if (MPCM0 == 0) { //#2-6 packets do not use multiprocessor
 		switch (packcount) {
 			case 1:
-				if (UDR0 == 0x1) packcount++;
+				if (UDR0 == 0x1) packcount++; //Verify lower part of data by addr
 				break;
 			case 2:
-				score = UDR0; 
+				score = UDR0;  //Keep first part of data
 				packcount++;
 				break;
 			case 3:
-				if (UDR0 == 0x2) packcount++;
+				if (UDR0 == 0x2) packcount++; //Verify higher part of data by addr
 				break;
 			case 4:
-				score += UDR0 << 8;
+				score += UDR0 << 8; //Cat higher part of data 
 				packcount ++;
 				break;
 			case 5:
-				if (UDR0 == 0xFF) {
+				if (UDR0 == 0xFF) { //Verify end of transmission
 					packcount = 0;
-					UCSR0A |= (1<<MPCM0);
+					UCSR0A |= (1<<MPCM0); //Change back to multiprocessor
 				}
 				break;
 		}
